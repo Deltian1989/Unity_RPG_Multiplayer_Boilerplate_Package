@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Linq;
 using MidniteOilSoftware.Core;
-using Unity.Multiplayer.Playmode;
+
 using Unity.Services.Authentication;
 using UnityEngine;
 using System.Threading.Tasks;
@@ -32,10 +32,10 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
         {
             if (_debugLog) Debug.Log("MultiplayerPlayModeManager:Multiplayer-InitializeMPPM");
     
-            var allTags = CurrentPlayer.ReadOnlyTags().ToArray();
+            var allTags = Unity.Multiplayer.PlayMode.CurrentPlayer.ReadOnlyTags().ToArray();
             if (_debugLog) Debug.Log($"MultiplayerPlayModeManager:Multiplayer-All tags: [{string.Join(", ", allTags)}]");
     
-            ProfileName = CurrentPlayer.ReadOnlyTags().Except(new[]
+            ProfileName = Unity.Multiplayer.PlayMode.CurrentPlayer.ReadOnlyTags().Except(new[]
                 {
                     LobbyHostKey, LobbyClientKey, HostKey, ClientKey, ServerKey
                 })
@@ -50,27 +50,27 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
 
             if (_debugLog) Debug.Log($"MultiplayerPlayModeManager:Multiplayer-Starting as {ProfileName}");
 
-            if (CurrentPlayer.ReadOnlyTags().Contains(LobbyHostKey))
+            if (Unity.Multiplayer.PlayMode.CurrentPlayer.ReadOnlyTags().Contains(LobbyHostKey))
             {
                 if (_debugLog) Debug.Log("MultiplayerPlayModeManager:Multiplayer-Starting Lobby Host Coroutine");
                 StartCoroutine(LobbyHost());
             }
-            if (CurrentPlayer.ReadOnlyTags().Contains(LobbyClientKey))
+            if (Unity.Multiplayer.PlayMode.CurrentPlayer.ReadOnlyTags().Contains(LobbyClientKey))
             {
                 if (_debugLog) Debug.Log("MultiplayerPlayModeManager:Multiplayer-Starting Lobby Client Coroutine");
                 StartCoroutine(LobbyClient());
             }
-            if (CurrentPlayer.ReadOnlyTags().Contains(HostKey))
+            if (Unity.Multiplayer.PlayMode.CurrentPlayer.ReadOnlyTags().Contains(HostKey))
             {
                 if (_debugLog) Debug.Log("MultiplayerPlayModeManager:Multiplayer-Starting Host Coroutine");
                 StartCoroutine(Host());
             }
-            if (CurrentPlayer.ReadOnlyTags().Contains(ClientKey))
+            if (Unity.Multiplayer.PlayMode.CurrentPlayer.ReadOnlyTags().Contains(ClientKey))
             {
                 if (_debugLog) Debug.Log("MultiplayerPlayModeManager:Multiplayer-Starting Client Coroutine");
                 StartCoroutine(Client());
             }
-            if (CurrentPlayer.ReadOnlyTags().Contains(ServerKey))
+            if (Unity.Multiplayer.PlayMode.CurrentPlayer.ReadOnlyTags().Contains(ServerKey))
             {
                 if (_debugLog) Debug.Log("MultiplayerPlayModeManager:Multiplayer-Starting Server Coroutine");
                 StartCoroutine(Server());
