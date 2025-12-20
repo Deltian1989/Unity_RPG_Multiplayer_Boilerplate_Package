@@ -5,7 +5,6 @@ namespace MidniteOilSoftware.Core
 {
     public static class HelperFunctions 
     {    
-        // my code modification
         static readonly Dictionary<float, WaitForSeconds> WaitForSeconds = new();
     
         public static WaitForSeconds GetWaitForSeconds(float seconds)

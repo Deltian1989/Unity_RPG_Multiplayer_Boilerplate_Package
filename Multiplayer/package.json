@@ -1,13 +1,13 @@
 {
-  "name": "com.midniteoilsoftware.multiplayer",
-  "version": "1.9.1",
-  "displayName": "Midnite Oil Software Multiplayer Boilerplate",
+  "name": "com.deltianstudio.multiplayer",
+  "version": "1.0.1",
+  "displayName": "Deltian Studio Multiplayer Boilerplate",
   "description": "Boilerplate for making multiplayer games in Unity using Netcode for GameObjects, Unity Gaming Services (Lobby, Relay), and authentication. Includes complete Othello sample game demonstrating turn-based multiplayer gameplay.",
   "category": "Utility",
   "unity": "6000.0",
   "author": {
-    "name": "Midnite Oil Software L.L.C.",
-    "url": "https://github.com/Midnite-Oil-Software-L-L-C"
+    "name": "Deltian Studio",
+    "url": "https://github.com/Deltian1989"
   },
   "license": "MIT",
   "dependencies": {

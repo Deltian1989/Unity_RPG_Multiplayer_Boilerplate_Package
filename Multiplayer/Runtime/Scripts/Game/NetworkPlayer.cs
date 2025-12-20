@@ -3,6 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 using MidniteOilSoftware.Core;
 using MidniteOilSoftware.Multiplayer.Authentication;
+using System;
 
 namespace MidniteOilSoftware.Multiplayer
 {
@@ -13,6 +14,8 @@ namespace MidniteOilSoftware.Multiplayer
         public ulong ConnectionId => OwnerClientId;
         public NetworkVariable<FixedString32Bytes> PlayerId;
         public NetworkVariable<FixedString32Bytes> PlayerName;
+        public NetworkVariable<int> CharacterId;
+        public NetworkVariable<FixedString32Bytes> CharacterName;
 
         GameManager _gameManager;
 
@@ -119,6 +122,12 @@ namespace MidniteOilSoftware.Multiplayer
         
             if (_enableDebugLog)
                 Debug.Log($"NetworkPlayer:Multiplayer-Set PlayerName to '{playerName}' for ClientId {clientId}");
+        }
+
+        public void SetCharacterSelection(int characterId, string characterName)
+        {
+            CharacterId.Value = characterId;
+            CharacterName.Value = characterName;
         }
     }
 }
