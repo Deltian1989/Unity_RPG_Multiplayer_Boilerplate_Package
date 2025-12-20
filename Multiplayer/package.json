@@ -11,7 +11,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "com.midniteoilsoftware.core": "1.6.0",
+    "com.deltianstudio.core": "1.0.1",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.inputsystem": "1.14.2",
     "com.unity.ugui": "2.0.0",
