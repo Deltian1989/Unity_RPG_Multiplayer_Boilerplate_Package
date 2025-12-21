@@ -9,12 +9,20 @@ using MidniteOilSoftware.Multiplayer;
 using MidniteOilSoftware.Multiplayer.Authentication;
 using Unity.Services.Relay;
 using UnityEngine;
+using Unity.Netcode;
 
 namespace MidniteOilSoftware
 {
     public class SessionManager : SingletonMonoBehaviour<SessionManager>
     {
+        public bool SingleplayerMode { get; private set; }
+        public bool MultiplayerMode { get; private set; }
+
         [SerializeField] GameSessionManager _gameSessionManager;
+
+        public event System.Action OnSingleplayerGameStarted;
+        public event System.Action OnSingleplayerGameEnded;
+
         public event System.Action<ISession> OnSessionJoined;
         public event System.Action OnSessionLeft;
 
@@ -48,6 +56,34 @@ namespace MidniteOilSoftware
             return Task.FromResult(properties);
         }
 
+        public void StartSessionAsSingleplayerHost()
+        {
+            if (_enableDebugLog) Debug.Log($"SessionManager:Singleplayer-Creating singleplayer session.");
+            try
+            {
+                if (_enableDebugLog)
+                {
+                    Debug.Log("SessionManager:Singleplayer-Calling CreateSessionAsync");
+                }
+
+                bool startedHost = NetworkManager.Singleton.StartHost();
+
+                if (_enableDebugLog)
+                {
+                    Debug.Log($"SessionManager:Singleplayer-Created singleplayer session");
+                }
+
+                OnSingleplayerGameStarted?.Invoke();
+
+                SingleplayerMode = true;
+                MultiplayerMode = false;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"SessionManager:Singleplayer-Failed to create session: {e}");
+            }
+        }
+
         public async void StartSessionAsHost(string sessionName)
         {
             if (_enableDebugLog) Debug.Log($"SessionManager:Multiplayer-Creating session with name: {sessionName}. Calling GetPlayerProperties()");
@@ -72,6 +108,10 @@ namespace MidniteOilSoftware
                 {
                     Debug.Log($"SessionManager:Multiplayer-Created session {_activeSession.Name} with ID: {_activeSession.Id}");
                 }
+
+                SingleplayerMode = false;
+                MultiplayerMode = true;
+
                 OnSessionJoined?.Invoke(_activeSession);
             }
             catch (RelayServiceException e)
@@ -92,12 +132,43 @@ namespace MidniteOilSoftware
             {
                 PlayerProperties = playerProperties
             };
+
+            SingleplayerMode = false;
+            MultiplayerMode = true;
+
             _activeSession = await MultiplayerService.Instance.JoinSessionByIdAsync(sessionId, options);
             OnSessionJoined?.Invoke(_activeSession);
         }
 
+        public void LeaveSingleplayerSession()
+        {
+            SingleplayerMode = false;
+            MultiplayerMode = false;
+
+            try
+            {
+                if (_enableDebugLog)
+                {
+                    Debug.Log($"SessionManager:Multiplayer-Leaving session {_activeSession.Name} with ID: {_activeSession.Id}");
+                }
+
+                NetworkManager.Singleton.Shutdown();
+            }
+            catch
+            {
+                // Ignored as we are exiting the game
+            }
+            finally
+            {
+                OnSingleplayerGameEnded?.Invoke();
+            }
+        }
+
         public async void LeaveSession()
         {
+            SingleplayerMode = false;
+            MultiplayerMode = false;
+
             if (_activeSession == null) return;
             try
             {
@@ -106,6 +177,8 @@ namespace MidniteOilSoftware
                     Debug.Log($"SessionManager:Multiplayer-Leaving session {_activeSession.Name} with ID: {_activeSession.Id}");
                 }
                 await _activeSession.LeaveAsync();
+
+
             }
             catch
             {
