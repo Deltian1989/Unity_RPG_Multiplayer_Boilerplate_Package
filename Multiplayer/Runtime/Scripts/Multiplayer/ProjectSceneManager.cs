@@ -28,6 +28,8 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
         [SerializeField] string _gameSceneName;
         [SerializeField] string _mainMenuSceneName = "Main Menu";
 
+        public Action<SceneEvent> OnSceneLoading;
+
         public bool IsLoading { get; private set; }
 
         protected override void Start()
@@ -57,10 +59,17 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
             NetworkManager.Singleton.SceneManager.OnLoadComplete -= HandleLoadCompleteForIndividualPlayer;
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += HandleLoadEventCompletedForAllPlayers;
             NetworkManager.Singleton.SceneManager.OnLoadComplete += HandleLoadCompleteForIndividualPlayer;
+            NetworkManager.Singleton.SceneManager.OnSceneEvent -= HandleSceneEventForIndividualPlayer;
+            NetworkManager.Singleton.SceneManager.OnSceneEvent += HandleSceneEventForIndividualPlayer;
 
             LoadGameScene();
         }
-        
+
+        private void HandleSceneEventForIndividualPlayer(SceneEvent sceneEvent)
+        {
+            OnSceneLoading?.Invoke(sceneEvent);
+        }
+
         void LoadMainMenuScene()
         {
             // If no main menu scene specified or already loaded, do nothing
