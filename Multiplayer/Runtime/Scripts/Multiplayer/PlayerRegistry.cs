@@ -183,8 +183,16 @@ namespace MidniteOilSoftware.Multiplayer
             OnPlayersChanged?.Invoke();
         }
 
+        
+        public void SetPlayerCharacterSelection(int characterId, string characterName)
+        {
+            ulong localClientId = LocalPlayer.OwnerClientId;
+
+            SetPlayerCharacterSelectionServerRpc(localClientId, characterId, characterName);
+        }
+
         [Rpc(SendTo.Server)]
-        public void SetPlayerCharacterSelectionServerRpc(ulong clientId, int characterId, string characterName)
+        private void SetPlayerCharacterSelectionServerRpc(ulong clientId, int characterId, string characterName)
         {
             if (_registeredPlayers.TryGetValue(clientId, out var player))
             {
