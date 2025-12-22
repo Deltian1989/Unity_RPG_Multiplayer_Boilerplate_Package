@@ -188,6 +188,8 @@ namespace MidniteOilSoftware.Multiplayer
         {
             ulong localClientId = LocalPlayer.OwnerClientId;
 
+            LocalPlayer.SetCharacterClassVisualsLocally(characterId);
+
             SetPlayerCharacterSelectionServerRpc(localClientId, characterId, characterName);
         }
 
