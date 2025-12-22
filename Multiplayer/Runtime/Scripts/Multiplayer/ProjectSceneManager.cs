@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using MidniteOilSoftware.Core;
 using Unity.Netcode;
 using UnityEditor;
@@ -28,7 +29,9 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
         [SerializeField] string _gameSceneName;
         [SerializeField] string _mainMenuSceneName = "Main Menu";
 
-        public Action<SceneEvent> OnSceneLoading;
+        [SerializeField] string playerSpawnPointTagName = "PlayerSpawnPoint";
+
+        public Action<SceneEvent> OnSceneLoadingEvent;
 
         public bool IsLoading { get; private set; }
 
@@ -39,7 +42,7 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
         }
 
         [ContextMenu(nameof(SetupSceneManagementAndLoadGameScene))]
-        public void SetupSceneManagementAndLoadGameScene()
+        public void SetupSceneManagementAndLoadGameScene(string levelSceneName)
         {
             if (!IsServer)
             {
@@ -62,12 +65,12 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
             NetworkManager.Singleton.SceneManager.OnSceneEvent -= HandleSceneEventForIndividualPlayer;
             NetworkManager.Singleton.SceneManager.OnSceneEvent += HandleSceneEventForIndividualPlayer;
 
-            LoadGameScene();
+            LoadGameScene(levelSceneName);
         }
 
         private void HandleSceneEventForIndividualPlayer(SceneEvent sceneEvent)
         {
-            OnSceneLoading?.Invoke(sceneEvent);
+            OnSceneLoadingEvent?.Invoke(sceneEvent);
         }
 
         void LoadMainMenuScene()
@@ -80,13 +83,13 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
             SceneManager.LoadSceneAsync(_mainMenuSceneName, LoadSceneMode.Single);
         }
 
-        void LoadGameScene()
+        void LoadGameScene(string levelSceneName)
         {
             if (_enableDebugLog)
             {
                 Debug.Log($"Multiplayer:ProjectSceneManager - Loading Game Scene: {_gameSceneName}");
             }
-            StartCoroutine(LoadSceneAsync(_gameSceneName));
+            StartCoroutine(LoadLevelSceneAsync(_gameSceneName, levelSceneName));
         }
 
         static bool VerifySceneBeforeLoading(int sceneIndex, string sceneName, LoadSceneMode loadSceneMode)
@@ -96,7 +99,7 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
             return isValid;
         }
 
-        IEnumerator LoadSceneAsync(string sceneName = default, LoadSceneMode loadSceneMode = LoadSceneMode.Additive)
+        IEnumerator LoadLevelSceneAsync(string sceneName = default, string levelSceneName = default)
         {
             IsLoading = true;
             if (_enableDebugLog) Debug.Log($"Multiplayer:ProjectSceneManager - LoadSceneAsync {sceneName}");
@@ -107,12 +110,22 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
                 if (_enableDebugLog) Debug.Log($"Multiplayer:ProjectSceneManager - Unloading current scene {currentScene.Item1.name}");
                 yield return UnloadScene(currentScene.Item1);
             }
-            
+
+            var currentLevelScene = GetCurrentLevelScene(levelSceneName);
+
+            if (currentLevelScene != default && currentLevelScene.Item1.name != levelSceneName)
+            {
+                if (_enableDebugLog) Debug.Log($"Multiplayer:ProjectSceneManager - Unloading current level scene {currentLevelScene.Item1.name}");
+                yield return UnloadScene(currentLevelScene.Item1);
+            }
+
             while (NetworkManager.Singleton?.SceneManager == null) yield return null;
 
             try
             {
-                NetworkManager.Singleton.SceneManager.LoadScene(sceneName, loadSceneMode);
+                NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
+
+                NetworkManager.Singleton.SceneManager.LoadScene(levelSceneName, LoadSceneMode.Additive);
             }
             catch (Exception e)
             {
@@ -126,9 +139,6 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
             string sceneName, 
             LoadSceneMode loadSceneMode)
         {
-            if (!sceneName.Equals(_gameSceneName))
-                return;
-
             if (_enableDebugLog)
             {
                 Debug.Log($"Multiplayer:ProjectSceneManager - HandleLoadCompleteForIndividualPlayer: Scene {sceneName} loaded for client {clientId}");
@@ -149,7 +159,7 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
                 return;
             }
 
-            ProcessPlayerForScene(clientId, playerNetworkObject);
+            ProcessPlayerForScene(clientId, playerNetworkObject, sceneName);
         }
 
         IEnumerator RetryGetPlayerAfterDelay(ulong clientId, string sceneName, float delay)
@@ -163,7 +173,7 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
                 {
                     Debug.Log($"Multiplayer:ProjectSceneManager - Successfully found PlayerNetworkObject for clientId {clientId} after delay");
                 }
-                ProcessPlayerForScene(clientId, playerNetworkObject);
+                ProcessPlayerForScene(clientId, playerNetworkObject, sceneName);
             }
             else
             {
@@ -174,7 +184,7 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
             }
         }
 
-        void ProcessPlayerForScene(ulong clientId, NetworkObject playerNetworkObject)
+        void ProcessPlayerForScene(ulong clientId, NetworkObject playerNetworkObject, string levelSceneName)
         {
             var player = playerNetworkObject.GetComponent<NetworkPlayer>();
             if (player == null)
@@ -196,6 +206,12 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
             }
 
             // Add any additional player processing logic here if needed
+
+            if (levelSceneName != _mainMenuSceneName &&
+                levelSceneName != _gameSceneName)
+            {
+                player.EnablePlayerToStartGame();
+            }
         }
 
         void HandleLoadEventCompletedForAllPlayers(string sceneName, LoadSceneMode loadSceneMode,
@@ -206,6 +222,32 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
             {
                 Debug.Log($"Multiplayer:ProjectSceneManager - HandleLoadEventCompletedForAllPlayers {sceneName} {loadSceneMode} Completed:{clientsCompleted.Count} TimedOut:{clientsTimedOut.Count}");
             }
+
+            for (int i = 0; i < clientsCompleted.Count; i++)
+            {
+                ulong clientId = clientsCompleted[i];
+
+                if (_enableDebugLog)
+                {
+                    Debug.Log($"Multiplayer:ProjectSceneManager - Client {clientId} completed loading scene {sceneName}");
+                }
+
+                var player = PlayerRegistry.Instance.Players.FirstOrDefault(p => p.OwnerClientId == clientId);
+
+                if (!player)
+                {
+                    if (_enableDebugLog)
+                    {
+                        Debug.LogWarning($"Multiplayer:ProjectSceneManager - No player found for clientId {clientId} in PlayerRegistry");
+                    }
+                }
+
+                var spawnPoints = GameObject.FindGameObjectsWithTag(playerSpawnPointTagName);
+
+                player.transform.position = spawnPoints[i].transform.position;
+                player.transform.rotation = spawnPoints[i].transform.rotation;
+            }
+
             IsLoading = false;
         }
 
@@ -216,6 +258,24 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
                 var scene = SceneManager.GetSceneAt(i);
                 if (scene.name != _gameSceneName) continue;
                 _currentScene = scene;
+                return new Tuple<Scene, string>(_currentScene, _currentScene.name);
+            }
+
+            return default;
+        }
+
+        Tuple<Scene, string> GetCurrentLevelScene(string levelSceneName)
+        {
+            for (var i = 0; i < SceneManager.loadedSceneCount; i++)
+            {
+                var scene = SceneManager.GetSceneAt(i);
+
+                if (scene.isSubScene) continue;
+
+                if (scene.name != levelSceneName) continue;
+
+                _currentScene = scene;
+
                 return new Tuple<Scene, string>(_currentScene, _currentScene.name);
             }
 

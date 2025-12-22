@@ -10,7 +10,7 @@ namespace MidniteOilSoftware.Multiplayer
     public class NetworkPlayer : NetworkBehaviour
     {
         [SerializeField] bool _enableDebugLog = true;
-        
+
         public ulong ConnectionId => OwnerClientId;
         public NetworkVariable<FixedString32Bytes> PlayerId;
         public NetworkVariable<FixedString32Bytes> PlayerName;
@@ -80,6 +80,19 @@ namespace MidniteOilSoftware.Multiplayer
             base.OnNetworkDespawn();
         }
 
+        public virtual void EnablePlayerToStartGame()
+        { 
+            if (_enableDebugLog)
+                Debug.Log($"NetworkPlayer:Multiplayer-EnablePlayerToStartGame called for ClientId: {OwnerClientId}");
+            // Implement player enabling logic here (e.g., enable character controller, visuals, etc.)
+        }
+
+        public void SetCharacterSelection(int characterId, string characterName)
+        {
+            CharacterId.Value = characterId;
+            CharacterName.Value = characterName;
+        }
+
         void InitializePlayer()
         {
             if (!IsServer) return; // only server can set NetworkVariables!
@@ -122,12 +135,6 @@ namespace MidniteOilSoftware.Multiplayer
         
             if (_enableDebugLog)
                 Debug.Log($"NetworkPlayer:Multiplayer-Set PlayerName to '{playerName}' for ClientId {clientId}");
-        }
-
-        public void SetCharacterSelection(int characterId, string characterName)
-        {
-            CharacterId.Value = characterId;
-            CharacterName.Value = characterName;
         }
     }
 }
