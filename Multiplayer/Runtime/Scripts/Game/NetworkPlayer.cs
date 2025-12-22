@@ -80,6 +80,13 @@ namespace MidniteOilSoftware.Multiplayer
             base.OnNetworkDespawn();
         }
 
+        public  virtual void SetCharacterClassVisualsLocally(int characterId)
+        {
+            if (_enableDebugLog)
+                Debug.Log($"NetworkPlayer:Multiplayer-SetCharacterClassVisualsLocally called for ClientId: {OwnerClientId} and the character class id: {characterId}");
+            // Implement character class visuals logic here (e.g., change model, materials, etc.)
+        }
+
         public virtual void EnablePlayerToStartGame()
         { 
             if (_enableDebugLog)
