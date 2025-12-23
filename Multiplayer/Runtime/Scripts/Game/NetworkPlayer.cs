@@ -1,9 +1,10 @@
-using Unity.Collections;
-using Unity.Netcode;
-using UnityEngine;
 using MidniteOilSoftware.Core;
 using MidniteOilSoftware.Multiplayer.Authentication;
 using System;
+using Unity.Collections;
+using Unity.Netcode;
+using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 namespace MidniteOilSoftware.Multiplayer
 {
@@ -32,6 +33,9 @@ namespace MidniteOilSoftware.Multiplayer
         {
             PlayerId = new();
             PlayerName = new();
+            CharacterId = new();
+            CharacterName = new();
+
             DontDestroyOnLoad(gameObject);
             
             if (_enableDebugLog)
