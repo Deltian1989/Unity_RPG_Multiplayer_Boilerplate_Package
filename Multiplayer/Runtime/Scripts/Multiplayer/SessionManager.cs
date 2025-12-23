@@ -68,18 +68,31 @@ namespace MidniteOilSoftware
 
                 bool startedHost = NetworkManager.Singleton.StartHost();
 
-                if (_enableDebugLog)
+                if (startedHost)
                 {
-                    Debug.Log($"SessionManager:Singleplayer-Created singleplayer session");
+                    SingleplayerMode = true;
+                    MultiplayerMode = false;
+
+                    if (_enableDebugLog)
+                    {
+                        Debug.Log($"SessionManager:Singleplayer-Created singleplayer session");
+                    }
+
+                    OnSingleplayerGameStarted?.Invoke();
+                }
+                else
+                {
+                    SingleplayerMode = false;
+                    MultiplayerMode = false;
                 }
 
-                OnSingleplayerGameStarted?.Invoke();
 
-                SingleplayerMode = true;
-                MultiplayerMode = false;
             }
             catch (Exception e)
             {
+                SingleplayerMode = false;
+                MultiplayerMode = false;
+
                 Debug.LogError($"SessionManager:Singleplayer-Failed to create session: {e}");
             }
         }
