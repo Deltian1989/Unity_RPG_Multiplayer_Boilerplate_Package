@@ -26,8 +26,8 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
             if (_mainMenuScene) _mainMenuSceneName = _mainMenuScene?.name ?? "Main Menu";
         }
 #endif
-        [SerializeField] string _gameSceneName;
-        [SerializeField] string _mainMenuSceneName = "Main Menu";
+        [SerializeField] string _gameSceneName = "Gameplay";
+        [SerializeField] string _mainMenuSceneName = "MainMenu";
 
         [SerializeField] string playerSpawnPointTagName = "PlayerSpawnPoint";
 
