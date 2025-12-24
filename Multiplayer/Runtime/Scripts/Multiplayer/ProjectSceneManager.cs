@@ -223,32 +223,35 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
                 Debug.Log($"Multiplayer:ProjectSceneManager - HandleLoadEventCompletedForAllPlayers {sceneName} {loadSceneMode} Completed:{clientsCompleted.Count} TimedOut:{clientsTimedOut.Count}");
             }
 
-            for (int i = 0; i < clientsCompleted.Count; i++)
+            if (sceneName != _gameSceneName)
             {
-                ulong clientId = clientsCompleted[i];
-
-                if (_enableDebugLog)
+                for (int i = 0; i < clientsCompleted.Count; i++)
                 {
-                    Debug.Log($"Multiplayer:ProjectSceneManager - Client {clientId} completed loading scene {sceneName}");
-                }
+                    ulong clientId = clientsCompleted[i];
 
-                var player = PlayerRegistry.Instance.Players.FirstOrDefault(p => p.OwnerClientId == clientId);
-
-                if (!player)
-                {
                     if (_enableDebugLog)
                     {
-                        Debug.LogWarning($"Multiplayer:ProjectSceneManager - No player found for clientId {clientId} in PlayerRegistry");
+                        Debug.Log($"Multiplayer:ProjectSceneManager - Client {clientId} completed loading scene {sceneName}");
                     }
+
+                    var player = PlayerRegistry.Instance.Players.FirstOrDefault(p => p.OwnerClientId == clientId);
+
+                    if (!player)
+                    {
+                        if (_enableDebugLog)
+                        {
+                            Debug.LogWarning($"Multiplayer:ProjectSceneManager - No player found for clientId {clientId} in PlayerRegistry");
+                        }
+                    }
+
+                    var spawnPoints = GameObject.FindGameObjectsWithTag(playerSpawnPointTagName);
+
+                    player.transform.position = spawnPoints[i].transform.position;
+                    player.transform.rotation = spawnPoints[i].transform.rotation;
                 }
 
-                var spawnPoints = GameObject.FindGameObjectsWithTag(playerSpawnPointTagName);
-
-                player.transform.position = spawnPoints[i].transform.position;
-                player.transform.rotation = spawnPoints[i].transform.rotation;
+                IsLoading = false;
             }
-
-            IsLoading = false;
         }
 
         Tuple<Scene, string> GetCurrentScene()
