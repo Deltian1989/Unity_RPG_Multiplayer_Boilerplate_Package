@@ -33,31 +33,13 @@ namespace MidniteOilSoftware.Multiplayer
             // Check if the payload is null or empty, which is the case for the host
             if (payload == null || payload.Length == 0)
             {
-                if (SessionManager.Instance.SingleplayerMode)
-                {
-                    data = new ConnectionData
-                    {
-                        Name = "Singleplayer",
-                        Id = "SingleplayerHost"
-                    };
-                }
-                else if (SessionManager.Instance.MultiplayerMode)
-                {
-                    // For the host, create a ConnectionData object from the local player's info
-                    data = new ConnectionData
-                    {
-                        Name = AuthenticationManager.Instance.PlayerName,
-                        Id = AuthenticationService.Instance.PlayerId
-                    };
-                }
-                else
-                {
-                    
-                    if (_enableDebugLog) Debug.LogError("PlayerConnectionsManager:The game is neither set to singleplayer game nor multiplayer game.");
 
-                    return;
-                }
-                    
+                data = new ConnectionData
+                {
+                    Name = AuthenticationManager.Instance.PlayerName ?? "Singleplayer",
+                    Id = AuthenticationService.Instance.PlayerId ?? "SingleplayerHost"
+                };
+
                 if (_enableDebugLog) Debug.Log("PlayerConnectionsManager:Multiplayer-Payload is null. Assuming this is the host and creating ConnectionData.");
             }
             else
