@@ -103,19 +103,12 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
         {
             IsLoading = true;
             if (_enableDebugLog) Debug.Log($"Multiplayer:ProjectSceneManager - LoadSceneAsync {sceneName}");
-            var currentScene = GetCurrentScene(_mainMenuSceneName);
-
-            if (currentScene != default && currentScene.Item1.name != sceneName)
-            {
-                if (_enableDebugLog) Debug.Log($"Multiplayer:ProjectSceneManager - Unloading current scene {currentScene.Item1.name}");
-                yield return UnloadScene(currentScene.Item1);
-            }
 
             while (NetworkManager.Singleton?.SceneManager == null) yield return null;
 
             try
             {
-                NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
+                NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
 
                 NetworkManager.Singleton.SceneManager.LoadScene(levelSceneName, LoadSceneMode.Additive);
             }
