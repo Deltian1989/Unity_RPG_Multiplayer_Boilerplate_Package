@@ -103,20 +103,12 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
         {
             IsLoading = true;
             if (_enableDebugLog) Debug.Log($"Multiplayer:ProjectSceneManager - LoadSceneAsync {sceneName}");
-            var currentScene = GetCurrentScene();
+            var currentScene = GetCurrentScene(_mainMenuSceneName);
 
             if (currentScene != default && currentScene.Item1.name != sceneName)
             {
                 if (_enableDebugLog) Debug.Log($"Multiplayer:ProjectSceneManager - Unloading current scene {currentScene.Item1.name}");
                 yield return UnloadScene(currentScene.Item1);
-            }
-
-            var currentLevelScene = GetCurrentLevelScene(levelSceneName);
-
-            if (currentLevelScene != default && currentLevelScene.Item1.name != levelSceneName)
-            {
-                if (_enableDebugLog) Debug.Log($"Multiplayer:ProjectSceneManager - Unloading current level scene {currentLevelScene.Item1.name}");
-                yield return UnloadScene(currentLevelScene.Item1);
             }
 
             while (NetworkManager.Singleton?.SceneManager == null) yield return null;
@@ -254,14 +246,16 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
             }
         }
 
-        Tuple<Scene, string> GetCurrentScene()
+        Tuple<Scene, string> GetCurrentScene(string mainMenuSceneName)
         {
             for (var i = 0; i < SceneManager.loadedSceneCount; i++)
             {
                 var scene = SceneManager.GetSceneAt(i);
-                if (scene.name != _gameSceneName) continue;
-                _currentScene = scene;
-                return new Tuple<Scene, string>(_currentScene, _currentScene.name);
+                if (scene.name == mainMenuSceneName)
+                {
+                    _currentScene = scene;
+                    return new Tuple<Scene, string>(_currentScene, _currentScene.name);
+                }
             }
 
             return default;
@@ -318,9 +312,9 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
             _unloading = false;
         }
 
-        public IEnumerator UnloadCurrentScene()
+        public IEnumerator UnloadCurrentScene(string scene)
         {
-            var currentScene = GetCurrentScene();
+            var currentScene = GetCurrentScene(scene);
             if (_enableDebugLog)
             {
                 Debug.Log($"Multiplayer:ProjectSceneManager - Unloading current scene {currentScene.Item1.name}");
