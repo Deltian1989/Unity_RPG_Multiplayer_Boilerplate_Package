@@ -53,8 +53,10 @@ namespace MidniteOilSoftware.Multiplayer
             _playerConnectionsToNames[request.ClientNetworkId] = data.Name;
             _playerConnectionsToIds[request.ClientNetworkId] = data.Id;
 
+            CharacterManager.Instance.AddNewCharacterData(request.ClientNetworkId);
+
             response.Approved = true;
-            response.CreatePlayerObject = true;
+            response.CreatePlayerObject = false;
         }
 
         public void RegisterPlayerAndRemoveDuplicates(NetworkPlayer networkPlayer)
