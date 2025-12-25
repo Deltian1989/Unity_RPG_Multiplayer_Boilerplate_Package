@@ -18,7 +18,6 @@ namespace MidniteOilSoftware.Multiplayer
         public event System.Action<NetworkPlayer> OnPlayerRegistered;
         public event System.Action<NetworkPlayer> OnPlayerUnregistered;
         public event System.Action OnPlayersChanged;
-        public event System.Action<int, string> OnPlayerCharacterSelectionChanged;
 
         protected override void Awake()
         {
@@ -181,36 +180,6 @@ namespace MidniteOilSoftware.Multiplayer
             _playerList.Clear();
             LocalPlayer = null;
             OnPlayersChanged?.Invoke();
-        }
-
-        
-        public void SetPlayerCharacterSelection(int characterId, string characterName)
-        {
-            ulong localClientId = LocalPlayer.OwnerClientId;
-
-            LocalPlayer.SetCharacterClassVisualsLocally(characterId);
-
-            SetPlayerCharacterSelectionServerRpc(localClientId, characterId, characterName);
-        }
-
-        [Rpc(SendTo.Server)]
-        private void SetPlayerCharacterSelectionServerRpc(ulong clientId, int characterId, string characterName)
-        {
-            if (_registeredPlayers.TryGetValue(clientId, out var player))
-            {
-                player.SetCharacterSelection(characterId, characterName);
-
-                if (_enableDebugLog)
-                    Debug.Log($"Multiplayer:PlayerRegistry - Set character selection for player {player.PlayerName.Value} to ID: {characterId}, Name: {characterName}");
-
-                NotifyPlayerCharacterSelectionChangedClientRpc(characterId, characterName);
-            }
-        }
-
-        [Rpc(SendTo.NotServer)]
-        private void NotifyPlayerCharacterSelectionChangedClientRpc(int characterId, string characterName)
-        {
-            OnPlayerCharacterSelectionChanged?.Invoke(characterId, characterName);
         }
 
         [Rpc(SendTo.NotServer)]

@@ -29,8 +29,6 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
         [SerializeField] string _gameSceneName = "Gameplay";
         [SerializeField] string _mainMenuSceneName = "MainMenu";
 
-        [SerializeField] string playerSpawnPointTagName = "PlayerSpawnPoint";
-
         public Action<SceneEvent> OnSceneLoadingEvent;
 
         public bool IsLoading { get; private set; }
@@ -191,12 +189,6 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
             }
 
             // Add any additional player processing logic here if needed
-
-            if (levelSceneName != _mainMenuSceneName &&
-                levelSceneName != _gameSceneName)
-            {
-                player.EnablePlayerToStartGame();
-            }
         }
 
         void HandleLoadEventCompletedForAllPlayers(string sceneName, LoadSceneMode loadSceneMode,
@@ -208,35 +200,7 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
                 Debug.Log($"Multiplayer:ProjectSceneManager - HandleLoadEventCompletedForAllPlayers {sceneName} {loadSceneMode} Completed:{clientsCompleted.Count} TimedOut:{clientsTimedOut.Count}");
             }
 
-            if (sceneName != _gameSceneName)
-            {
-                for (int i = 0; i < clientsCompleted.Count; i++)
-                {
-                    ulong clientId = clientsCompleted[i];
-
-                    if (_enableDebugLog)
-                    {
-                        Debug.Log($"Multiplayer:ProjectSceneManager - Client {clientId} completed loading scene {sceneName}");
-                    }
-
-                    var player = PlayerRegistry.Instance.Players.FirstOrDefault(p => p.OwnerClientId == clientId);
-
-                    if (!player)
-                    {
-                        if (_enableDebugLog)
-                        {
-                            Debug.LogWarning($"Multiplayer:ProjectSceneManager - No player found for clientId {clientId} in PlayerRegistry");
-                        }
-                    }
-
-                    var spawnPoints = GameObject.FindGameObjectsWithTag(playerSpawnPointTagName);
-
-                    player.transform.position = spawnPoints[i].transform.position;
-                    player.transform.rotation = spawnPoints[i].transform.rotation;
-                }
-
-                IsLoading = false;
-            }
+            IsLoading = false;
         }
 
         Tuple<Scene, string> GetCurrentScene(string mainMenuSceneName)

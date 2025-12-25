@@ -1,10 +1,7 @@
-using MidniteOilSoftware.Core;
 using MidniteOilSoftware.Multiplayer.Authentication;
-using System;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 
 namespace MidniteOilSoftware.Multiplayer
 {
@@ -15,8 +12,10 @@ namespace MidniteOilSoftware.Multiplayer
         public ulong ConnectionId => OwnerClientId;
         public NetworkVariable<FixedString32Bytes> PlayerId;
         public NetworkVariable<FixedString32Bytes> PlayerName;
-        public NetworkVariable<int> CharacterId;
-        public NetworkVariable<FixedString32Bytes> CharacterName;
+        public string CharacterName;
+        public int CharacterId;
+
+        private NetworkObject _networkObject;
 
         GameManager _gameManager;
 
@@ -33,10 +32,8 @@ namespace MidniteOilSoftware.Multiplayer
         {
             PlayerId = new();
             PlayerName = new();
-            CharacterId = new();
-            CharacterName = new();
 
-            DontDestroyOnLoad(gameObject);
+            _networkObject= GetComponent<NetworkObject>();
             
             if (_enableDebugLog)
                 Debug.Log("NetworkPlayer:Multiplayer-NetworkPlayer Awake - DontDestroyOnLoad set");
@@ -84,24 +81,12 @@ namespace MidniteOilSoftware.Multiplayer
             base.OnNetworkDespawn();
         }
 
-        public  virtual void SetCharacterClassVisualsLocally(int characterId)
+        public void InitializePlayerSpawn()
         {
-            if (_enableDebugLog)
-                Debug.Log($"NetworkPlayer:Multiplayer-SetCharacterClassVisualsLocally called for ClientId: {OwnerClientId} and the character class id: {characterId}");
-            // Implement character class visuals logic here (e.g., change model, materials, etc.)
-        }
+            _networkObject.SpawnAsPlayerObject(OwnerClientId, true);
 
-        public virtual void EnablePlayerToStartGame()
-        { 
             if (_enableDebugLog)
-                Debug.Log($"NetworkPlayer:Multiplayer-EnablePlayerToStartGame called for ClientId: {OwnerClientId}");
-            // Implement player enabling logic here (e.g., enable character controller, visuals, etc.)
-        }
-
-        public void SetCharacterSelection(int characterId, string characterName)
-        {
-            CharacterId.Value = characterId;
-            CharacterName.Value = characterName;
+                Debug.Log($"NetworkPlayer:Multiplayer-InitializePlayer called for ClientId: {OwnerClientId}");
         }
 
         void InitializePlayer()
