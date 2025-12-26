@@ -20,7 +20,7 @@ namespace MidniteOilSoftware
 
         [SerializeField] GameSessionManager _gameSessionManager;
 
-        public event System.Action OnSingleplayerGameStarted;
+        public event System.Action<int, string> OnSingleplayerGameStarted;
         public event System.Action OnSingleplayerGameEnded;
 
         public event System.Action<ISession> OnSessionJoined;
@@ -56,7 +56,7 @@ namespace MidniteOilSoftware
             return Task.FromResult(properties);
         }
 
-        public void StartSessionAsSingleplayerHost()
+        public void StartSessionAsSingleplayerHost(int characterClassId, string characterName)
         {
             if (_enableDebugLog) Debug.Log($"SessionManager:Singleplayer-Creating singleplayer session.");
             try
@@ -78,7 +78,7 @@ namespace MidniteOilSoftware
                         Debug.Log($"SessionManager:Singleplayer-Created singleplayer session");
                     }
 
-                    OnSingleplayerGameStarted?.Invoke();
+                    OnSingleplayerGameStarted?.Invoke(characterClassId, characterName);
                 }
                 else
                 {
