@@ -31,6 +31,8 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
 
         public Action<SceneEvent> OnSceneLoadingEvent;
 
+        private string currentLevelSceneName;
+
         public bool IsLoading { get; private set; }
 
         protected override void Start()
@@ -42,6 +44,8 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
         [ContextMenu(nameof(SetupSceneManagementAndLoadGameScene))]
         public void SetupSceneManagementAndLoadGameScene(string levelSceneName)
         {
+            currentLevelSceneName = levelSceneName;
+
             if (!IsServer)
             {
                 if (_enableDebugLog)
@@ -107,8 +111,6 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
             try
             {
                 NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
-
-                NetworkManager.Singleton.SceneManager.LoadScene(levelSceneName, LoadSceneMode.Additive);
             }
             catch (Exception e)
             {
@@ -139,10 +141,19 @@ namespace MidniteOilSoftware.Multiplayer.Lobby
                 
                 // Optionally retry after a short delay
                 StartCoroutine(RetryGetPlayerAfterDelay(clientId, sceneName, 0.5f));
-                return;
+            }
+            else
+            {
+                ProcessPlayerForScene(clientId, playerNetworkObject, sceneName);
             }
 
-            ProcessPlayerForScene(clientId, playerNetworkObject, sceneName);
+            if (IsServer)
+            {
+                if (sceneName == _gameSceneName)
+                {
+                    NetworkManager.Singleton.SceneManager.LoadScene(currentLevelSceneName, LoadSceneMode.Additive);
+                }
+            }
         }
 
         IEnumerator RetryGetPlayerAfterDelay(ulong clientId, string sceneName, float delay)
