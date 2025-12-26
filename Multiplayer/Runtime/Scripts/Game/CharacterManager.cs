@@ -82,7 +82,7 @@ namespace MidniteOilSoftware.Multiplayer
 
         }
 
-        public virtual bool CheckIsCurrentSceneLevelScene()
+        public virtual bool CheckIsCurrentSceneLevelScene(string sceneName)
         {
             return false;
         }
@@ -107,7 +107,7 @@ namespace MidniteOilSoftware.Multiplayer
                                                      List<ulong> clientsCompleted,
                                                      List<ulong> clientsTimedOut)
         {
-            if (CheckIsCurrentSceneLevelScene())
+            if (CheckIsCurrentSceneLevelScene(sceneName))
             {
                 if (_enableDebugLog)
                 {
