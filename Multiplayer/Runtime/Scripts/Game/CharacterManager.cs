@@ -123,11 +123,9 @@ namespace MidniteOilSoftware.Multiplayer
                         Debug.Log($"Multiplayer:ProjectSceneManager - Client {clientId} completed loading scene {sceneName}");
                     }
 
-                    var player = Instantiate(playerPrefab);
-
                     var spawnPoints = GameObject.FindGameObjectsWithTag(playerSpawnPointTagName);
 
-                    player.transform.SetPositionAndRotation(spawnPoints[i].transform.position, spawnPoints[i].transform.rotation);
+                    var player = Instantiate(playerPrefab, spawnPoints[i].transform.position, spawnPoints[i].transform.rotation);
 
                     player.InitializePlayerSpawn();
 
