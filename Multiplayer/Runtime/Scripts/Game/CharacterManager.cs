@@ -125,11 +125,11 @@ namespace MidniteOilSoftware.Multiplayer
 
                     var player = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
 
-                    player.InitializePlayerSpawn();
-
                     var spawnPoints = GameObject.FindGameObjectsWithTag(playerSpawnPointTagName);
 
                     player.transform.SetPositionAndRotation(spawnPoints[i].transform.position, spawnPoints[i].transform.rotation);
+
+                    player.InitializePlayerSpawn();
 
                     if (_enableDebugLog)
                     {
