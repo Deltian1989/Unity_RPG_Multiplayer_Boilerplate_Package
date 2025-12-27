@@ -129,8 +129,7 @@ namespace MidniteOilSoftware.Multiplayer
 
                     var spawnPoints = GameObject.FindGameObjectsWithTag(playerSpawnPointTagName);
 
-                    player.transform.position = spawnPoints[i].transform.position;
-                    player.transform.rotation = spawnPoints[i].transform.rotation;
+                    player.transform.SetPositionAndRotation(spawnPoints[i].transform.position, spawnPoints[i].transform.rotation);
                 }
             }
         }
