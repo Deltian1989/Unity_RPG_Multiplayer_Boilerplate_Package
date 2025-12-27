@@ -123,7 +123,7 @@ namespace MidniteOilSoftware.Multiplayer
                         Debug.Log($"Multiplayer:ProjectSceneManager - Client {clientId} completed loading scene {sceneName}");
                     }
 
-                    var player = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+                    var player = Instantiate(playerPrefab);
 
                     var spawnPoints = GameObject.FindGameObjectsWithTag(playerSpawnPointTagName);
 
