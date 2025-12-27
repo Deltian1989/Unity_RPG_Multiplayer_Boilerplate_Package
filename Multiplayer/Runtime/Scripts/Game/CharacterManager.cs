@@ -130,6 +130,11 @@ namespace MidniteOilSoftware.Multiplayer
                     var spawnPoints = GameObject.FindGameObjectsWithTag(playerSpawnPointTagName);
 
                     player.transform.SetPositionAndRotation(spawnPoints[i].transform.position, spawnPoints[i].transform.rotation);
+
+                    if (_enableDebugLog)
+                    {
+                        Debug.Log($"Multiplayer:ProjectSceneManager - Spawning player for ClientId {clientId} at SpawnPoint x: {spawnPoints[i].transform.position.x}, y: {spawnPoints[i].transform.position.y}, z: {spawnPoints[i].transform.position.z}");
+                    }
                 }
             }
         }
