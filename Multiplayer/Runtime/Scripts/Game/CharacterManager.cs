@@ -24,7 +24,10 @@ namespace MidniteOilSoftware.Multiplayer
             base.Awake();
 
             CharacterData.OnListChanged += OnCharacterDataListChanged;
+        }
 
+        private void Start()
+        {
             NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnected;
         }
 
