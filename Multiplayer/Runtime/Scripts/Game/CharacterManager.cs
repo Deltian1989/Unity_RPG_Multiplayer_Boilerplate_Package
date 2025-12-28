@@ -24,6 +24,8 @@ namespace MidniteOilSoftware.Multiplayer
             base.Awake();
 
             CharacterData.OnListChanged += OnCharacterDataListChanged;
+
+            NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnected;
         }
 
         public override void OnNetworkSpawn()
@@ -32,6 +34,19 @@ namespace MidniteOilSoftware.Multiplayer
 
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= HandleLoadEventCompletedForAllPlayers;
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += HandleLoadEventCompletedForAllPlayers;
+        }
+
+        private void HandleClientDisconnected(ulong clientId)
+        {
+            for (int i = 0; i < CharacterData.Count; i++)
+            {
+                var characterDataEntry = CharacterData[i];
+                if (characterDataEntry.clientId == clientId)
+                {
+                    CharacterData.RemoveAt(i);
+                    return;
+                }
+            }
         }
 
         public CharacterData GetCharacterData(ulong clientId)
